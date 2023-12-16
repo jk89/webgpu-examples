@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "noImplicitAny": true,
+    "module": "es6",
+    "target": "ES2015",
+    "allowJs": true,
+    "sourceMap": true,
+    "types": ["@webgpu/types"]
+  },
+  "files": ["src/index.ts", "src/types/shader.d.ts"]
+}
