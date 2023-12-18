@@ -38,11 +38,7 @@ const main = async () => {
     const format = navigator.gpu.getPreferredCanvasFormat();
     context.configure({device, format});
 
-
     const uniform_time = device.createBuffer({size: Float32Array.BYTES_PER_ELEMENT, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST})
-    
-    
-    // Create a bind group layout for your shader
     const bind_group_layout = device.createBindGroupLayout({
         entries: [
         {
@@ -54,7 +50,6 @@ const main = async () => {
         }
         ]
     });
-
     const group_uniform_time = device.createBindGroup({
         layout: bind_group_layout,
         entries: [
@@ -68,12 +63,11 @@ const main = async () => {
             }
         ]
     });
-
     const pipeline_layout = device.createPipelineLayout({
         bindGroupLayouts: [bind_group_layout]
-      });
+    });
 
-      const pipeline = device.createRenderPipeline({
+    const pipeline = device.createRenderPipeline({
         layout: pipeline_layout,
         vertex: {
             module: device.createShaderModule({
@@ -107,7 +101,6 @@ const main = async () => {
             ]
         };
 
-        // device.queue.writeBuffer(uniform_time, 0, frame_idx);
         device.queue.writeBuffer(uniform_time, 0, new Float32Array([frame_idx]));
         const render_pass = command_encoder.beginRenderPass(render_pass_descriptor);
         render_pass.setPipeline(pipeline);
@@ -117,9 +110,7 @@ const main = async () => {
 
         device.queue.submit([command_encoder.finish()]);
         frame_idx++;
-        requestAnimationFrame(paint);
-        // console.log("kool", frame_idx);
-        
+        requestAnimationFrame(paint);        
     };
     requestAnimationFrame(paint);
     
