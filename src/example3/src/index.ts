@@ -13,6 +13,7 @@ const main = async () => {
     const device = await adaptor.requestDevice() as GPUDevice;
     const format = navigator.gpu.getPreferredCanvasFormat();
     context.configure({device, format});
+    // context.configure({device, format,alphaMode: 'premultiplied'});// aa
 
     const uniform_time = device.createBuffer({size: Float32Array.BYTES_PER_ELEMENT, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST});
     const uniform_rotation = device.createBuffer({size: Float32Array.BYTES_PER_ELEMENT * 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST});
@@ -74,18 +75,30 @@ const main = async () => {
             entryPoint: "frag",
             targets: [{format}]
         },
-        primitive: {topology:"triangle-list"}
+        primitive: {topology:"triangle-list"},
+        /*multisample: {
+            count: 4,
+        }*/ // aa
     });
-
 
     function paint() {
         const command_encoder = device.createCommandEncoder();
-        const view = context.getCurrentTexture().createView();
+
+        /*const texture = device.createTexture({
+            size: [canvas.width, canvas.height],
+            sampleCount: 4,
+            format,
+            usage: GPUTextureUsage.RENDER_ATTACHMENT,
+          });
+          const view = texture.createView();*/
+          const view = context.getCurrentTexture().createView();
+
 
         const render_pass_descriptor: GPURenderPassDescriptor = {
             colorAttachments: [
                 {
                     view,
+                    // resolveTarget: context.getCurrentTexture().createView(), // aa
                     loadOp: "clear",
                     storeOp: "store",
                     clearValue: {r:0.0, g:0.0, b:0.0, a: 1.0}
