@@ -94,7 +94,9 @@ const main = async () => {
         };
 
         device.queue.writeBuffer(uniform_time, 0, new Float32Array([frame_idx]));
-        device.queue.writeBuffer(uniform_rotation, 0, mat4.rotationZ(frame_idx/100))
+        const rotation_matrix = mat4.create();
+        mat4.rotationZ(frame_idx/100, rotation_matrix);
+        device.queue.writeBuffer(uniform_rotation, 0, rotation_matrix);
         const render_pass = command_encoder.beginRenderPass(render_pass_descriptor);
         render_pass.setPipeline(pipeline);
         render_pass.setBindGroup(0, group_uniform_time);
