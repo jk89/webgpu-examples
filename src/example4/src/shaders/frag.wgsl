@@ -20,9 +20,13 @@ struct Vertex {
 
     var min_length = 2000.0;
     for (var i: u32 = 0; i < 4u; i = i + 1u) {
-        var len = (length(position[i].xy - vertex_input.pos_intep) * 1.0);
+        var len = (length(position[i].xy - vertex_input.pos_intep) * 2.0);
         min_length = min(len,min_length);
     }
+    min_length = 1.0 - min_length;
 
     return vec4<f32>(min_length, min_length, min_length, 1.0);
 }
+
+    // we want when length is zero then we want luminosity 1
+    // when the length is max then we want luminosity 0

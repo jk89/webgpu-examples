@@ -8,8 +8,8 @@ struct Vertex {
     // square middle is at 0.0,0.0 -0.5 -> 0.5 both x and y
     var position = array<vec3<f32>,3>(
         vec3<f32>(0.0, 0.577, 0.0),   // top center
-    vec3<f32>(-0.5, -0.289, 0.0), // bottom left
-    vec3<f32>(0.5, -0.289, 0.0)   // bottom right
+        vec3<f32>(-0.5, -0.289, 0.0), // bottom left
+        vec3<f32>(0.5, -0.289, 0.0)   // bottom right
     );
     var color = array<vec4<f32>,3>(
         vec4<f32>(1.0,0.0,0.0,1.0), // a
