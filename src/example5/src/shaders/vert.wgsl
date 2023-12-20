@@ -17,7 +17,7 @@ struct Time {
         vec3<f32>(-0.7, -0.7, 0.0), // bottom left
         vec3<f32>(0.7, -0.7, 0.0)   // bottom right
     );
-    let current_time: f32 = time_buffer.time / 100.0;
+    let current_time: f32 = time_buffer.time / 200.0;
     var offset: f32 = f32(vert_idx) * 2.0944;
     var vertex: Vertex;
     vertex.position = vec4<f32>(position[vert_idx],1.0);
