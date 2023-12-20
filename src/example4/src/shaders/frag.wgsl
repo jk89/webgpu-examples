@@ -13,12 +13,12 @@ struct Vertex {
 
 @fragment fn frag(vertex_input: Vertex) -> @location(0) vec4<f32> {    
     var position = array<vec3<f32>,3>(
-        vec3<f32>(-0.5, -0.5, 0.0), // a
-        vec3<f32>(0.5, -0.5, 0.0), // b
-        vec3<f32>(0.5, 0.5, 0.0), // c
+        vec3<f32>(0.0, 0.577, 0.0),   // top center
+        vec3<f32>(-0.5, -0.289, 0.0), // bottom left
+        vec3<f32>(0.5, -0.289, 0.0)   // bottom right
     );
 
-    var min_length = 100.0;
+    var min_length = 2000.0;
     for (var i: u32 = 0; i < 4u; i = i + 1u) {
         var len = (length(position[i].xy - vertex_input.pos_intep) * 1.0);
         min_length = min(len,min_length);

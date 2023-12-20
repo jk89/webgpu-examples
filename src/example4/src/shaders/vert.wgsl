@@ -7,9 +7,9 @@ struct Vertex {
 @vertex fn vert(@builtin(vertex_index) vert_idx: u32) -> Vertex {
     // square middle is at 0.0,0.0 -0.5 -> 0.5 both x and y
     var position = array<vec3<f32>,3>(
-        vec3<f32>(-0.5, -0.5, 0.0), // a
-        vec3<f32>(0.5, -0.5, 0.0), // b
-        vec3<f32>(0.5, 0.5, 0.0), // c
+        vec3<f32>(0.0, 0.577, 0.0),   // top center
+    vec3<f32>(-0.5, -0.289, 0.0), // bottom left
+    vec3<f32>(0.5, -0.289, 0.0)   // bottom right
     );
     var color = array<vec4<f32>,3>(
         vec4<f32>(1.0,0.0,0.0,1.0), // a
