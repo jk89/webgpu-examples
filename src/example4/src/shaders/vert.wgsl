@@ -12,9 +12,9 @@ struct Vertex {
         vec3<f32>(0.5, -0.289, 0.0)   // bottom right
     );
     var color = array<vec4<f32>,3>(
-        vec4<f32>(1.0,0.0,0.0,1.0), // a
-        vec4<f32>(0.0,1.0,0.0,1.0), // b
-        vec4<f32>(0.0,0.0,1.0,1.0), // c
+        vec4<f32>(1.0,0.0,0.0,1.0), // top center
+        vec4<f32>(0.0,1.0,0.0,1.0), // bottom left
+        vec4<f32>(0.0,0.0,1.0,1.0), // botton right
     );
     var vertex: Vertex;
     vertex.position = vec4<f32>(position[vert_idx],1.0);
