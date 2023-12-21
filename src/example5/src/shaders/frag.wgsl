@@ -21,7 +21,7 @@ struct Time {
         var len = (length(position[i].xy - vertex_input.pos_intep) * 2.0);
         min_length = min(len,min_length);
     }
-    var luminosity = min(min_length,1.0) * 2.0;// + ((cos(time_buffer.time/100)+0.5) / 5.0);
+    var luminosity = min(min_length,1.0) * 2.0 + ((cos(time_buffer.time/100)+0.5) / 10.0);
     return vertex_input.color * luminosity;
 }
 
