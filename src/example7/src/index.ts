@@ -132,16 +132,22 @@ const main = async () => {
         const view_projection_buffer = device.createBuffer({
             size: view_projection_matrix.length * Float32Array.BYTES_PER_ELEMENT,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+            mappedAtCreation: true,
         });
+
+        new Float32Array(view_projection_buffer.getMappedRange()).set(view_projection_matrix);
+        view_projection_buffer.unmap();
         
         const vectors_buffer = device.createBuffer({
             size: tetrahedron_vertices.length * Float32Array.BYTES_PER_ELEMENT,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
         });
 
+        // new Float32Array(vectors_buffer.getMappedRange()).set(tetrahedron_vertices);
+        // vectors_buffer.unmap();
+
+
         const canvas_texture = context.getCurrentTexture();
-
-
 
         const bind_group = device.createBindGroup(
             {
