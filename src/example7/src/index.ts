@@ -40,9 +40,45 @@ const main = async () => {
         {code: shaders}
     );
 
+    const bind_group_layout = device.createBindGroupLayout({
+        label: "compute_group_bind_layout",
+        entries: [
+            {
+                binding: 0, // Texture binding
+                visibility: GPUShaderStage.COMPUTE,
+                storageTexture: {
+                    viewDimension: '2d', // View dimension based on your texture
+                    format: "bgra8unorm",
+                    access: "write-only"
+                },
+                
+                // storageTextureFormat: 'rgba8unorm', // Texture format
+            },
+            {
+                binding: 1, // Camera binding
+                visibility: GPUShaderStage.COMPUTE,
+                buffer: { 
+                    type: 'storage'
+                }
+            },
+            {
+                binding: 2, // Verts binding
+                visibility: GPUShaderStage.COMPUTE,
+                buffer: { 
+                    type: 'storage'
+                }
+            }
+        ]  
+    });
+    
+
+    const pipeline_layout = device.createPipelineLayout({
+        bindGroupLayouts: [bind_group_layout]
+    });
+
     const compute_pipeline = device.createComputePipeline({
         label: 'checkboard pipeline',
-        layout: 'auto',
+        layout: pipeline_layout,
         compute: {
           module: compute_shader_module,
           entryPoint: 'write_screen',
@@ -105,42 +141,14 @@ const main = async () => {
 
         const canvas_texture = context.getCurrentTexture();
 
-        const bind_group_layout = device.createBindGroupLayout({
-            label: "compute_group_bind_layout",
-            entries: [
-                {
-                    binding: 0, // Texture binding
-                    visibility: GPUShaderStage.COMPUTE,
-                    texture: {
-                        sampleType: 'float', // Sample type based on your usage
-                        viewDimension: '2d', // View dimension based on your texture
-                        multisampled: false, // Multisampling flag
-                    },
-                    // storageTextureFormat: 'rgba8unorm', // Texture format
-                },
-                /*{
-                    binding: 1, // Camera binding
-                    visibility: GPUShaderStage.COMPUTE,
-                    buffer: { 
-                        type: 'storage'
-                    }
-                },
-                {
-                    binding: 2, // Verts binding
-                    visibility: GPUShaderStage.COMPUTE,
-                    buffer: { 
-                        type: 'storage'
-                    }
-                }*/
-            ]  
-        });
+
 
         const bind_group = device.createBindGroup(
             {
-                layout: compute_pipeline.getBindGroupLayout(0),//bind_group_layout,
+                layout:  bind_group_layout, // compute_pipeline.getBindGroupLayout(0),//bind_group_layout,
                 entries: [
                     { binding: 0, resource: canvas_texture.createView() },
-                    /*{binding: 1, resource: {
+                    {binding: 1, resource: {
                         buffer: view_projection_buffer,
                         offset: 0,
                         size: Float32Array.BYTES_PER_ELEMENT * 16
@@ -149,7 +157,7 @@ const main = async () => {
                         buffer: vectors_buffer,
                         offset: 0,
                         size: Float32Array.BYTES_PER_ELEMENT * 16
-                    }}*/
+                    }}
                 ],
             }
         );
