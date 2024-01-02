@@ -79,6 +79,13 @@ const main = async () => {
                     type: 'storage'
                 }
             },
+            {
+                binding: 4, // Frame index binding
+                visibility: GPUShaderStage.COMPUTE,
+                buffer: {
+                    type: 'storage'
+                }
+            },
             
         ]  
     });
@@ -175,6 +182,11 @@ const main = async () => {
             size: hist_size * 4,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
         });
+
+        const frame_idx_buffer = device.createBuffer({
+            size: Uint32Array.BYTES_PER_ELEMENT,
+            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+        });
         
         const canvas_texture = context.getCurrentTexture();
 
@@ -197,7 +209,15 @@ const main = async () => {
                         buffer: hist_buffer,
                         offset: 0,
                         size: Int32Array.BYTES_PER_ELEMENT * hist_size
-                    }}
+                    }},
+                    { 
+                        binding: 4, 
+                        resource: {
+                            buffer: frame_idx_buffer,
+                            offset: 0,
+                            size: Uint32Array.BYTES_PER_ELEMENT
+                        }
+                    },
                 ],
             }
         );
@@ -209,6 +229,12 @@ const main = async () => {
             new Int32Array(hist_size).fill(0).buffer,
             0,
             hist_size * 4
+        );
+
+        device.queue.writeBuffer(
+            frame_idx_buffer,
+            0,
+            new Float32Array([frame_idx]).buffer,
         );
 
         const splat_command_encoder = device.createCommandEncoder();

@@ -4,6 +4,8 @@
 
 @group(0) @binding(3) var<storage, read_write> hist_atomic: array<atomic<i32>>;
 
+@group(0) @binding(4) var<storage, read_write> frame_idx: f32;
+
 
 
 @compute @workgroup_size(16, 16) fn write_screen(@builtin(global_invocation_id) id: vec3u) {
@@ -53,7 +55,7 @@ fn splat(@builtin(global_invocation_id) id: vec3<u32>) {
     // + hash_u(u32(proj_matrix_element))
 
     // get a random point.
-    seed = hash_u(id.x + hash_u(screen_dimensions.x*id.y*200u)*20u + hash_u(id.x)*250u + hash_u(id.z)*250u + hash_u(u32(proj_matrix_element))*250u  );
+    seed = hash_u(id.x + hash_u(screen_dimensions.x*id.y*200u)*20u + hash_u(id.x)*250u + hash_u(id.z)*250u + hash_u(u32(frame_idx))*250u  );
     seed = hash_u(seed);
     var p = hash_v3()*2. - 1.;
     var transformed_point = camera_matrix * vec4<f32>(p,1);
