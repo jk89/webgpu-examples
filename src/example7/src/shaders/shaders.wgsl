@@ -1,5 +1,7 @@
 @group(0) @binding(0) var screen: texture_storage_2d<bgra8unorm, write>;
-// var<workgroup> hist_atomic: array<atomic<i32>>;
+
+@group(0) @binding(1) var<storage, read_write> camera_matrix: mat4x4<f32>;
+
 @group(0) @binding(3) var<storage, read_write> hist_atomic: array<atomic<i32>>;
 
 
@@ -42,16 +44,26 @@ fn hash_v4() -> vec4<f32>{
 fn splat(@builtin(global_invocation_id) id: vec3<u32>) {
     let screen_dimensions = vec2<u32>(textureDimensions(screen));
     if (id.x >= screen_dimensions.x || id.y >= screen_dimensions.y) { return; }
+
+    var proj_matrix_element = camera_matrix[0][0] + camera_matrix[0][1] + camera_matrix[0][2] + camera_matrix[0][3] +
+    camera_matrix[1][0] + camera_matrix[1][1] + camera_matrix[2][2] + camera_matrix[3][3];
+
+    // + hash_u(u32(proj_matrix_element))
+
     // get a random point.
-    seed = hash_u(id.x + hash_u(screen_dimensions.x*id.y*200u)*20u + hash_u(id.x)*250u + hash_u(id.z)*250u );
+    seed = hash_u(id.x + hash_u(screen_dimensions.x*id.y*200u)*20u + hash_u(id.x)*250u + hash_u(id.z)*250u  );
     seed = hash_u(seed);
     var p = hash_v3()*2. - 1.;
+    var transformed_point = camera_matrix * vec4<f32>(p,1);
+    var normalized_point: vec3<f32> = transformed_point.xyz / transformed_point.w;
+
+    
 
     // Calculate the pixel index from the point 'p' in the range [-1, -1] to [1, 1]
-    var pixelX = i32((p.x + 1.0) * 0.5 * f32(screen_dimensions.x));
-    var pixelY = i32((p.y + 1.0) * 0.5 * f32(screen_dimensions.y));
+    var pixelX = i32((normalized_point.x + 1.0) * 0.5 * f32(screen_dimensions.x));
+    var pixelY = i32((normalized_point.y + 1.0) * 0.5 * f32(screen_dimensions.y));
 
-    if (pixelX < 0 || pixelX >= i32(screen_dimensions.x) || pixelY < 0 || pixelY >= i32(screen_dimensions.y)) {
+    if (pixelX < 0 || pixelX >= i32(screen_dimensions.x) || pixelY < 0 || pixelY >= i32(screen_dimensions.y) || normalized_point.z < 0) {
         return; // Exit the computation early if outside the screen dimensions
     }
 

@@ -4,6 +4,8 @@ import { mat4 } from "wgpu-matrix";
 // forked from https://compute.toys/view/282
 
 let frame_idx = 0;
+let frame_count = 0;
+let last_timestamp = 0;
 
 /*
 
@@ -19,7 +21,7 @@ const main = async () => {
     const fov = 60 * Math.PI / 180;
     const near = 0.1;
     const far = 1000;
-    const orbit_radius = 10;
+    const orbit_radius = 5;
 
     const canvas = document.querySelector("#webgpu") as HTMLCanvasElement;
     if (!navigator.gpu) return;
@@ -127,7 +129,9 @@ const main = async () => {
       ];
 
     function paint() {
-
+        const timestamp = performance.now()
+        const delta =  timestamp - last_timestamp;
+        
 
         const width = canvas.clientWidth;
         const height = canvas.clientHeight;
@@ -211,7 +215,7 @@ const main = async () => {
         const splat_compute_pass = splat_command_encoder.beginComputePass();
         splat_compute_pass.setPipeline(compute_splat_pipeline);
         splat_compute_pass.setBindGroup(0, bind_group);
-        splat_compute_pass.dispatchWorkgroups(64, 64, 12);
+        splat_compute_pass.dispatchWorkgroups(64, 64, 1); // 64, 64, 12
         splat_compute_pass.end();
         const command_splat_buffer = splat_command_encoder.finish();
         
@@ -225,6 +229,13 @@ const main = async () => {
         const command_screen_buffer = screen_command_encoder.finish();
         device.queue.submit([command_splat_buffer, command_screen_buffer]);
         //frame_idx++;
+        frame_count++;
+
+        if (delta > 1000) {
+            console.log(`FPS: ${(frame_count)}`);
+            frame_count = 0;
+            last_timestamp = timestamp;
+        }
         requestAnimationFrame(paint);        
     };
     setInterval(()=>frame_idx++,25);
