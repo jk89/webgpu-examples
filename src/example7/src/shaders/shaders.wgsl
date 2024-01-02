@@ -46,12 +46,14 @@ fn splat(@builtin(global_invocation_id) id: vec3<u32>) {
     if (id.x >= screen_dimensions.x || id.y >= screen_dimensions.y) { return; }
 
     var proj_matrix_element = camera_matrix[0][0] + camera_matrix[0][1] + camera_matrix[0][2] + camera_matrix[0][3] +
+    camera_matrix[1][0] + camera_matrix[1][1] + camera_matrix[1][2] + camera_matrix[1][3] +
+    camera_matrix[2][0] + camera_matrix[2][1] + camera_matrix[2][2] + camera_matrix[2][3] +
     camera_matrix[1][0] + camera_matrix[1][1] + camera_matrix[2][2] + camera_matrix[3][3];
 
     // + hash_u(u32(proj_matrix_element))
 
     // get a random point.
-    seed = hash_u(id.x + hash_u(screen_dimensions.x*id.y*200u)*20u + hash_u(id.x)*250u + hash_u(id.z)*250u  );
+    seed = hash_u(id.x + hash_u(screen_dimensions.x*id.y*200u)*20u + hash_u(id.x)*250u + hash_u(id.z)*250u + hash_u(u32(proj_matrix_element))*250u  );
     seed = hash_u(seed);
     var p = hash_v3()*2. - 1.;
     var transformed_point = camera_matrix * vec4<f32>(p,1);
