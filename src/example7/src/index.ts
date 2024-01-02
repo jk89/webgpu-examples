@@ -1,6 +1,8 @@
 import shaders from "./shaders/shaders.wgsl";
 import { mat4 } from "wgpu-matrix";
 
+// forked from https://compute.toys/view/282
+
 let frame_idx = 0;
 
 /*
@@ -67,7 +69,15 @@ const main = async () => {
                 buffer: { 
                     type: 'storage'
                 }
-            }
+            },
+            {
+                binding: 3, // Hist binding
+                visibility: GPUShaderStage.COMPUTE,
+                buffer: { 
+                    type: 'storage'
+                }
+            },
+            
         ]  
     });
     
@@ -76,8 +86,17 @@ const main = async () => {
         bindGroupLayouts: [bind_group_layout]
     });
 
-    const compute_pipeline = device.createComputePipeline({
-        label: 'checkboard pipeline',
+    const compute_splat_pipeline = device.createComputePipeline({
+        label: 'splat pipeline',
+        layout: pipeline_layout,
+        compute: {
+          module: compute_shader_module,
+          entryPoint: 'splat',
+        },
+      });
+
+    const compute_screen_pipeline = device.createComputePipeline({
+        label: 'write screen pipeline',
         layout: pipeline_layout,
         compute: {
           module: compute_shader_module,
@@ -141,17 +160,23 @@ const main = async () => {
         const vectors_buffer = device.createBuffer({
             size: tetrahedron_vertices.length * Float32Array.BYTES_PER_ELEMENT,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+            mappedAtCreation: true,
         });
 
-        // new Float32Array(vectors_buffer.getMappedRange()).set(tetrahedron_vertices);
-        // vectors_buffer.unmap();
+        new Float32Array(vectors_buffer.getMappedRange()).set(tetrahedron_vertices);
+        vectors_buffer.unmap();
 
-
+        const hist_size = width * height; // fix this
+        const hist_buffer = device.createBuffer({
+            size: hist_size * 4,
+            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+        });
+        
         const canvas_texture = context.getCurrentTexture();
 
         const bind_group = device.createBindGroup(
             {
-                layout:  bind_group_layout, // compute_pipeline.getBindGroupLayout(0),//bind_group_layout,
+                layout:  bind_group_layout, // compute_screen_pipeline.getBindGroupLayout(0),//bind_group_layout,
                 entries: [
                     { binding: 0, resource: canvas_texture.createView() },
                     {binding: 1, resource: {
@@ -162,22 +187,43 @@ const main = async () => {
                     {binding: 2, resource: {
                         buffer: vectors_buffer,
                         offset: 0,
-                        size: Float32Array.BYTES_PER_ELEMENT * 16
+                        size: Float32Array.BYTES_PER_ELEMENT * tetrahedron_vertices.length
+                    }},
+                    {binding: 3, resource: {
+                        buffer: hist_buffer,
+                        offset: 0,
+                        size: Int32Array.BYTES_PER_ELEMENT * hist_size
                     }}
                 ],
             }
         );
-        // device.queue.writeBuffer(view_projection_buffer, 0, vectors_buffer);
 
-        const command_encoder = device.createCommandEncoder();
-        const compute_pass = command_encoder.beginComputePass();
-        compute_pass.setPipeline(compute_pipeline);
-        compute_pass.setBindGroup(0, bind_group);
-        compute_pass.dispatchWorkgroups(canvas_texture.width, canvas_texture.height);
-        compute_pass.end();
-    
-        const commandBuffer = command_encoder.finish();
-        device.queue.submit([commandBuffer]);
+        // Manually map and fill hist_buffer after creation
+        device.queue.writeBuffer(
+            hist_buffer,
+            0,
+            new Int32Array(hist_size).fill(0).buffer,
+            0,
+            hist_size * 4
+        );
+
+        const splat_command_encoder = device.createCommandEncoder();
+        const splat_compute_pass = splat_command_encoder.beginComputePass();
+        splat_compute_pass.setPipeline(compute_splat_pipeline);
+        splat_compute_pass.setBindGroup(0, bind_group);
+        splat_compute_pass.dispatchWorkgroups(64, 64, 12);
+        splat_compute_pass.end();
+        const command_splat_buffer = splat_command_encoder.finish();
+        
+
+        const screen_command_encoder = device.createCommandEncoder();
+        const screen_compute_pass = screen_command_encoder.beginComputePass();
+        screen_compute_pass.setPipeline(compute_screen_pipeline);
+        screen_compute_pass.setBindGroup(0, bind_group);
+        screen_compute_pass.dispatchWorkgroups(canvas_texture.width, canvas_texture.height);
+        screen_compute_pass.end();    
+        const command_screen_buffer = screen_command_encoder.finish();
+        device.queue.submit([command_splat_buffer, command_screen_buffer]);
         //frame_idx++;
         requestAnimationFrame(paint);        
     };
