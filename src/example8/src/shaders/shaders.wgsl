@@ -1,28 +1,13 @@
 @group(0) @binding(0) var screen: texture_storage_2d<bgra8unorm, write>;
-@group(0) @binding(1) var<storage, read_write> camera_matrix: mat4x4<f32>;
-@group(0) @binding(2) var<storage, read_write> verticies: array<vec3<f32>>;
+@group(0) @binding(1) var<storage, read> camera_matrix: mat4x4<f32>;
+@group(0) @binding(2) var<storage, read> verticies: array<vec3<f32>>;
 @group(0) @binding(3) var<storage, read_write> hist_atomic: array<atomic<i32>>;
-@group(0) @binding(4) var<storage, read_write> frame_idx: f32;
+@group(0) @binding(4) var<storage, read> frame_idx: f32;
 var<private> seed: u32;
 fn hash_u(_a: u32) -> u32{ var a = _a; a ^= a >> 16;a *= 0x7feb352du;a ^= a >> 15;a *= 0x846ca68bu;a ^= a >> 16;return a; }
 fn hash_f() -> f32{ var s = hash_u(seed); seed = s;return ( f32( s ) / f32( 0xffffffffu ) ); }
-fn hash_v2() -> vec2<f32>{ 
-    var h1: f32 = f32(hash_f());
-    var h2: f32 = f32(hash_f());
-    return vec2<f32>(h1, h2); 
-}
 fn hash_v3() -> vec3<f32>{ 
-    var h1: f32 = f32(hash_f());
-    var h2: f32 = f32(hash_f());
-    var h3: f32 = f32(hash_f());
-    return vec3<f32>(h1, h2, h3); 
-}
-fn hash_v4() -> vec4<f32>{ 
-    var h1: f32 = f32(hash_f());
-    var h2: f32 = f32(hash_f());
-    var h3: f32 = f32(hash_f());
-    var h4: f32 = f32(hash_f());
-    return vec4<f32>(h1, h2, h3, h4); 
+    return vec3<f32>(hash_f(), hash_f(), hash_f()); 
 }
 
 @compute @workgroup_size(256, 1,1)

@@ -55,21 +55,19 @@ const main = async () => {
                     format: "bgra8unorm",
                     access: "write-only"
                 },
-                
-                // storageTextureFormat: 'rgba8unorm', // Texture format
             },
             {
                 binding: 1, // Camera binding
                 visibility: GPUShaderStage.COMPUTE,
                 buffer: { 
-                    type: 'storage'
+                    type: 'read-only-storage'
                 }
             },
             {
                 binding: 2, // Verts binding
                 visibility: GPUShaderStage.COMPUTE,
                 buffer: { 
-                    type: 'storage'
+                    type: 'read-only-storage'
                 }
             },
             {
@@ -83,7 +81,7 @@ const main = async () => {
                 binding: 4, // Frame index binding
                 visibility: GPUShaderStage.COMPUTE,
                 buffer: {
-                    type: 'storage'
+                    type: 'read-only-storage'
                 }
             },
             
@@ -113,11 +111,11 @@ const main = async () => {
         },
       });
 
-      const tetrahedron_vertices = [
-0.0, 1.0, 0.0,  // Apex
--1.0, -0.5, 0.5,  // Bottom left
-1.0, -0.5, 0.5,   // Bottom right
-0.0, -0.5, -1.0   // Bottom back
+      const vertices = [
+        0.0, 1.0, 0.0,  // Apex
+        -1.0, -0.5, 0.5,  // Bottom left
+        1.0, -0.5, 0.5,   // Bottom right
+        0.0, -0.5, -1.0   // Bottom back
       ];
 
     function paint() {
@@ -153,12 +151,12 @@ const main = async () => {
         view_projection_buffer.unmap();
         
         const vectors_buffer = device.createBuffer({
-            size: tetrahedron_vertices.length * Float32Array.BYTES_PER_ELEMENT,
+            size: vertices.length * Float32Array.BYTES_PER_ELEMENT,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
             mappedAtCreation: true,
         });
 
-        new Float32Array(vectors_buffer.getMappedRange()).set(tetrahedron_vertices);
+        new Float32Array(vectors_buffer.getMappedRange()).set(vertices);
         vectors_buffer.unmap();
 
         const hist_size = width * height;
@@ -187,7 +185,7 @@ const main = async () => {
                     {binding: 2, resource: {
                         buffer: vectors_buffer,
                         offset: 0,
-                        size: Float32Array.BYTES_PER_ELEMENT * tetrahedron_vertices.length
+                        size: Float32Array.BYTES_PER_ELEMENT * vertices.length
                     }},
                     {binding: 3, resource: {
                         buffer: hist_buffer,
