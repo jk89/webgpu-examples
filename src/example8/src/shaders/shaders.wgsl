@@ -12,7 +12,8 @@ fn hash_v3() -> vec3<f32>{
     return vec3<f32>(hash_f(), hash_f(), hash_f()); 
 }
 
-const verts = array<vec3f,4>(
+const verts = array<vec3f,4>
+(
     vec3<f32>(0.0, 1.0, 0.0),  // Apex
     vec3<f32>(-1.0, -0.5, 0.5),  // Bottom left
     vec3<f32>(1.0, -0.5, 0.5),   // Bottom right
@@ -38,7 +39,7 @@ fn splat(@builtin(global_invocation_id) id: vec3<u32>) {
         var vertex_p = verts[vertex_id]; // somehow 'verticies' does not work!
 
         // move point p towards the randomly chosen verteex
-        var mixed_point = mix(vertex_p, p, 0.5);
+        var mixed_point = mix(vertex_p, p, 0.6*abs(sin(frame_idx%1000/1000)));
         p = mixed_point;
 
         // transform the point based on the camera matrix
