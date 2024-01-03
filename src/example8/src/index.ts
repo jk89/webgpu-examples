@@ -21,7 +21,7 @@ const main = async () => {
     const fov = 60 * Math.PI / 180;
     const near = 0.1;
     const far = 1000;
-    const orbit_radius = 2;
+    const orbit_radius = 3;
 
     const canvas = document.querySelector("#webgpu") as HTMLCanvasElement;
     if (!navigator.gpu) return;
