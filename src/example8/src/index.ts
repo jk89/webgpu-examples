@@ -21,7 +21,7 @@ const main = async () => {
     const fov = 60 * Math.PI / 180;
     const near = 0.1;
     const far = 1000;
-    const orbit_radius = 3;
+    const orbit_radius = 1;
 
     const canvas = document.querySelector("#webgpu") as HTMLCanvasElement;
     if (!navigator.gpu) return;
@@ -139,7 +139,7 @@ const main = async () => {
             Math.sin(angle) * orbit_radius, // z
 
             Math.cos(angle) * orbit_radius, // x
-            1, // y Fixed height 
+            3, // y Fixed height 
         ];
         //eye = [1,2,-1];
 
