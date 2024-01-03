@@ -19,13 +19,12 @@ const verts = array<vec3f,4>
     vec3<f32>(1.0, -0.5, 0.5),   // Bottom right
     vec3<f32>(0.0, -0.5, -1.0)   // Bottom back
 );
-const verts2 = array<vec3f,6>(
+const verts2 = array<vec3f,5>(
     vec3<f32>(1.0, 0.0, 0.0),    // Vertex 1
     vec3<f32>(0.309, 0.951, 0.0), // Vertex 2
     vec3<f32>(-0.809, 0.587, 0.0),// Vertex 3
     vec3<f32>(-0.809, -0.587, 0.0),// Vertex 4
     vec3<f32>(0.309, -0.951, 0.0), // Vertex 5
-    vec3<f32>(0.0, 0.0, 1.0) // Vertex 5s
 );
 
 @compute @workgroup_size(256, 1,1)
