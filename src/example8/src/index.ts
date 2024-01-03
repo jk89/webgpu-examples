@@ -114,15 +114,10 @@ const main = async () => {
       });
 
       const tetrahedron_vertices = [
- // Bottom left
- -1.0, -1.0, 0.0,
- // Bottom right
- 1.0, -1.0, 0.0,
- // Top right
- 1.0, 1.0, 0.0,
- // Top left
- -1.0, 1.0, 0.0,
-
+0.0, 1.0, 0.0,  // Apex
+-1.0, -0.5, 0.5,  // Bottom left
+1.0, -0.5, 0.5,   // Bottom right
+0.0, -0.5, -1.0   // Bottom back
       ];
 
     function paint() {
@@ -136,12 +131,10 @@ const main = async () => {
         const angle = frame_idx / 100;
 
         let eye = [
-            Math.sin(angle) * orbit_radius, // z
-
-            Math.cos(angle) * orbit_radius, // x
-            3, // y Fixed height 
+            Math.sin(angle) * orbit_radius, // x
+            Math.cos(angle) * orbit_radius, // y
+            3 // z
         ];
-        //eye = [1,2,-1];
 
         const target = [0.0, 0, 0.0];
         const up = [0, 0, 1];
@@ -150,7 +143,6 @@ const main = async () => {
         const perspective = mat4.perspective(fov, aspect, near, far);
         const view_projection_matrix = mat4.multiply(perspective, view);
 
-        // Create buffers for projection matrix and vectors list
         const view_projection_buffer = device.createBuffer({
             size: view_projection_matrix.length * Float32Array.BYTES_PER_ELEMENT,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
@@ -169,7 +161,7 @@ const main = async () => {
         new Float32Array(vectors_buffer.getMappedRange()).set(tetrahedron_vertices);
         vectors_buffer.unmap();
 
-        const hist_size = width * height; // fix this
+        const hist_size = width * height;
         const hist_buffer = device.createBuffer({
             size: hist_size * 4,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
@@ -184,13 +176,13 @@ const main = async () => {
 
         const bind_group = device.createBindGroup(
             {
-                layout:  bind_group_layout, // compute_screen_pipeline.getBindGroupLayout(0),//bind_group_layout,
+                layout:  bind_group_layout,
                 entries: [
                     { binding: 0, resource: canvas_texture.createView() },
                     {binding: 1, resource: {
                         buffer: view_projection_buffer,
                         offset: 0,
-                        size: Float32Array.BYTES_PER_ELEMENT * 16
+                        size: Float32Array.BYTES_PER_ELEMENT * view_projection_matrix.length
                     }},
                     {binding: 2, resource: {
                         buffer: vectors_buffer,
@@ -233,7 +225,7 @@ const main = async () => {
         const splat_compute_pass = splat_command_encoder.beginComputePass();
         splat_compute_pass.setPipeline(compute_splat_pipeline);
         splat_compute_pass.setBindGroup(0, bind_group);
-        splat_compute_pass.dispatchWorkgroups(64, 64, 12); // 64, 64, 12
+        splat_compute_pass.dispatchWorkgroups(64, 64, 1); // 64, 64, 12
         splat_compute_pass.end();
         const command_splat_buffer = splat_command_encoder.finish();
         
