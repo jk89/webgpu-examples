@@ -21,7 +21,7 @@ const main = async () => {
     const fov = 60 * Math.PI / 180;
     const near = 0.1;
     const far = 1000;
-    const orbit_radius = 1;
+    const orbit_radius = 2;
 
     const canvas = document.querySelector("#webgpu") as HTMLCanvasElement;
     if (!navigator.gpu) return;
@@ -114,25 +114,15 @@ const main = async () => {
       });
 
       const tetrahedron_vertices = [
-        // Base triangle
-        0.0, 1.0, 0.0,
-        0.942809, -0.333333, 0.0,
-        -0.471405, -0.333333, -0.816497,
-      
-        // Side 1
-        0.0, 1.0, 0.0,
-        -0.471405, -0.333333, -0.816497,
-        0.0, -0.333333, 0.816497,
-      
-        // Side 2
-        0.0, 1.0, 0.0,
-        0.0, -0.333333, 0.816497,
-        0.942809, -0.333333, 0.0,
-      
-        // Side 3
-        0.942809, -0.333333, 0.0,
-        -0.471405, -0.333333, -0.816497,
-        0.0, -0.333333, 0.816497,
+ // Bottom left
+ -1.0, -1.0, 0.0,
+ // Bottom right
+ 1.0, -1.0, 0.0,
+ // Top right
+ 1.0, 1.0, 0.0,
+ // Top left
+ -1.0, 1.0, 0.0,
+
       ];
 
     function paint() {
@@ -145,14 +135,16 @@ const main = async () => {
         const aspect = width / height;
         const angle = frame_idx / 100;
 
-        const eye = [
-            Math.cos(angle) * orbit_radius, // x
-            5, // y Fixed height 
+        let eye = [
             Math.sin(angle) * orbit_radius, // z
-        ];
 
-        const target = [0, 0, 0];
-        const up = [0, 1, 0];
+            Math.cos(angle) * orbit_radius, // x
+            1, // y Fixed height 
+        ];
+        //eye = [1,2,-1];
+
+        const target = [0.0, 0, 0.0];
+        const up = [0, 0, 1];
         const view = mat4.lookAt(eye, target, up);
 
         const perspective = mat4.perspective(fov, aspect, near, far);

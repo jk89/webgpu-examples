@@ -2,6 +2,9 @@
 
 @group(0) @binding(1) var<storage, read_write> camera_matrix: mat4x4<f32>;
 
+@group(0) @binding(2) var<storage, read_write> verticies: array<vec3<f32>>;
+
+
 @group(0) @binding(3) var<storage, read_write> hist_atomic: array<atomic<i32>>;
 
 @group(0) @binding(4) var<storage, read_write> frame_idx: f32;
@@ -12,7 +15,7 @@
     let screen_dimensions = (textureDimensions(screen));
     let hist_id = id.x + screen_dimensions.x * id.y;
     let histogram_value = atomicLoad(&hist_atomic[hist_id]);
-    let modified_hist = log(f32(histogram_value/10));
+    let modified_hist = log(f32(histogram_value/100));
     let color = vec4f(f32(modified_hist), f32(modified_hist), f32(modified_hist), f32(modified_hist));
     //vec4f(fract(vec2f(id.xy) / 320.0), f32(screen_dimensions.y), 1);
     textureStore(screen, id.xy, color);
@@ -56,35 +59,52 @@ fn splat(@builtin(global_invocation_id) id: vec3<u32>) {
     // get a random point.
     seed = hash_u(id.x + hash_u(screen_dimensions.x*id.y*200u)*20u + hash_u(id.x)*250u + hash_u(id.z)*250u + hash_u(u32(frame_idx))*250u  );
     seed = hash_u(seed);
-    var p = hash_v3()*2. - 1.;
+    
     let sigma = 1.0;
 
     // Normalize the vector to ensure it lies on the unit sphere
-    let length = 1/sqrt(dot(p,p));
-    var p2 = vec3<f32>(p.x / length, p.y / length, p.z / length);
+    
 
-    let u = hash_f();
+    // let u = hash_f();
     let radius = 1.0; //sigma * sqrt(-2.0 * log(1.0 - u));
+    var p = hash_v3()*2. - 1.;
+    // let length = 1/sqrt(dot(p,p));
+    //var p2 = vec3<f32>(p.x / length, p.y / length, p.z / length);        // Scale the direction by the radius
+    //p = p2 * radius;
 
-    // Scale the direction by the radius
-    p = p2 * radius;
+    for (var i = 0; i < 60; i++) {
+        
+        
+
+        // ok find a random vertex
+        var vertex_id = i32(floor(hash_f() * 4.0 ));
+
+        var vertex_p = verticies[vertex_id];
+
+        var middlepoint = mix(vertex_p, p, 0.5);
+        p = middlepoint;
+
+        var transformed_point = camera_matrix * vec4<f32>(middlepoint,1);
+        var normalized_point: vec3<f32> = transformed_point.xyz / transformed_point.w;
+
+        // Calculate the pixel index from the point 'p' in the range [-1, -1] to [1, 1]
+        var pixelX = i32((normalized_point.x + 1.0) * 0.5 * f32(screen_dimensions.x));
+        var pixelY = i32((normalized_point.y + 1.0) * 0.5 * f32(screen_dimensions.y));
+
+        if (pixelX < 0 || pixelX >= i32(screen_dimensions.x) || pixelY < 0 || pixelY >= i32(screen_dimensions.y)) {
+            break; // Exit the computation early if outside the screen dimensions
+        }
+
+        // Combine 'pixelX' and 'pixelY' into a single index
+        var idx = pixelY * i32(screen_dimensions.x) + pixelX;
+        atomicAdd(&hist_atomic[idx],1);
+    }
+
+    
 
         //p = vec3<f32>(scaledX, scaledY, scaledZ);
 
    // p = vec3<f32>(x, y, z);
     
-    var transformed_point = camera_matrix * vec4<f32>(p,1);
-    var normalized_point: vec3<f32> = transformed_point.xyz / transformed_point.w;
-
-    // Calculate the pixel index from the point 'p' in the range [-1, -1] to [1, 1]
-    var pixelX = i32((normalized_point.x + 1.0) * 0.5 * f32(screen_dimensions.x));
-    var pixelY = i32((normalized_point.y + 1.0) * 0.5 * f32(screen_dimensions.y));
-
-    if (pixelX < 0 || pixelX >= i32(screen_dimensions.x) || pixelY < 0 || pixelY >= i32(screen_dimensions.y) || normalized_point.z < 0) {
-        return; // Exit the computation early if outside the screen dimensions
-    }
-
-    // Combine 'pixelX' and 'pixelY' into a single index
-    var idx = pixelY * i32(screen_dimensions.x) + pixelX;
-    atomicAdd(&hist_atomic[idx],1);
+    
 }
