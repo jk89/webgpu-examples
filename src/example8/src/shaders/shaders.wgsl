@@ -3,6 +3,8 @@
 @group(0) @binding(2) var<storage, read> verticies: array<vec3<f32>>;
 @group(0) @binding(3) var<storage, read_write> hist_atomic: array<atomic<i32>>;
 @group(0) @binding(4) var<storage, read> frame_idx: f32;
+
+// rng from https://compute.toys/view/282
 var<private> seed: u32;
 fn hash_u(_a: u32) -> u32{ var a = _a; a ^= a >> 16;a *= 0x7feb352du;a ^= a >> 15;a *= 0x846ca68bu;a ^= a >> 16;return a; }
 fn hash_f() -> f32{ var s = hash_u(seed); seed = s;return ( f32( s ) / f32( 0xffffffffu ) ); }
@@ -20,7 +22,7 @@ const verts = array<vec3f,4>(
 @compute @workgroup_size(256, 1,1)
 fn splat(@builtin(global_invocation_id) id: vec3<u32>) {
     let screen_dimensions = vec2<u32>(textureDimensions(screen));
-    
+
     // seed rng
     seed = hash_u(id.x + hash_u(screen_dimensions.x*id.y*200u)*20u + hash_u(id.x)*250u + hash_u(id.z)*250u + hash_u(u32(frame_idx))*250u  );
     seed = hash_u(seed);
