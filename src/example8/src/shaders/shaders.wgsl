@@ -19,6 +19,14 @@ const verts = array<vec3f,4>
     vec3<f32>(1.0, -0.5, 0.5),   // Bottom right
     vec3<f32>(0.0, -0.5, -1.0)   // Bottom back
 );
+const verts2 = array<vec3f,6>(
+    vec3<f32>(1.0, 0.0, 0.0),    // Vertex 1
+    vec3<f32>(0.309, 0.951, 0.0), // Vertex 2
+    vec3<f32>(-0.809, 0.587, 0.0),// Vertex 3
+    vec3<f32>(-0.809, -0.587, 0.0),// Vertex 4
+    vec3<f32>(0.309, -0.951, 0.0), // Vertex 5
+    vec3<f32>(0.0, 0.0, 1.0) // Vertex 5s
+);
 
 @compute @workgroup_size(256, 1,1)
 fn splat(@builtin(global_invocation_id) id: vec3<u32>) {
@@ -29,17 +37,17 @@ fn splat(@builtin(global_invocation_id) id: vec3<u32>) {
     seed = hash_u(seed);
 
     // random 3d point
-    var p = hash_v3()*2. - 1.;
+    var p = (hash_v3()*2. - 1.);
 
-    for (var i = 0; i < 60; i++) {
+    for (var i = 0; i < 100; i++) {
         // find a random vertex
-        var vertex_id = i32(floor(hash_f() * 4.0 ));
+        var vertex_id = i32(floor(hash_f() * 5.0 ));
 
         // Extract vertex from verts or verticies
         var vertex_p = verts[vertex_id]; // somehow 'verticies' does not work!
 
         // move point p towards the randomly chosen verteex
-        var mixed_point = mix(vertex_p, p, 0.6*abs(sin(frame_idx%1000/1000)));
+        var mixed_point = mix(vertex_p, p, 0.5);//0.65*abs(sin(frame_idx%1000/1000)));
         p = mixed_point;
 
         // transform the point based on the camera matrix
