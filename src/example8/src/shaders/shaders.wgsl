@@ -10,21 +10,20 @@ fn hash_v3() -> vec3<f32>{
     return vec3<f32>(hash_f(), hash_f(), hash_f()); 
 }
 
+const verts = array<vec3f,4>(
+    vec3<f32>(0.0, 1.0, 0.0),  // Apex
+    vec3<f32>(-1.0, -0.5, 0.5),  // Bottom left
+    vec3<f32>(1.0, -0.5, 0.5),   // Bottom right
+    vec3<f32>(0.0, -0.5, -1.0)   // Bottom back
+);
+
 @compute @workgroup_size(256, 1,1)
 fn splat(@builtin(global_invocation_id) id: vec3<u32>) {
     let screen_dimensions = vec2<u32>(textureDimensions(screen));
-
+    
     // seed rng
     seed = hash_u(id.x + hash_u(screen_dimensions.x*id.y*200u)*20u + hash_u(id.x)*250u + hash_u(id.z)*250u + hash_u(u32(frame_idx))*250u  );
     seed = hash_u(seed);
-
-
-    let verts = array<vec3f,4>(
-        vec3<f32>(0.0, 1.0, 0.0),  // Apex
-        vec3<f32>(-1.0, -0.5, 0.5),  // Bottom left
-        vec3<f32>(1.0, -0.5, 0.5),   // Bottom right
-        vec3<f32>(0.0, -0.5, -1.0)   // Bottom back
-    );
 
     // random 3d point
     var p = hash_v3()*2. - 1.;
@@ -33,10 +32,8 @@ fn splat(@builtin(global_invocation_id) id: vec3<u32>) {
         // find a random vertex
         var vertex_id = i32(floor(hash_f() * 4.0 ));
 
-        var help = verts[vertex_id] == verticies[vertex_id]; 
-
         // Extract vertex from verts or verticies
-        var vertex_p = verts[vertex_id];
+        var vertex_p = verts[vertex_id]; // somehow 'verticies' does not work!
 
         // move point p towards the randomly chosen verteex
         var mixed_point = mix(vertex_p, p, 0.5);
