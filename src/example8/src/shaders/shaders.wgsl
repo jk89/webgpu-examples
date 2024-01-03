@@ -62,6 +62,18 @@ fn splat(@builtin(global_invocation_id) id: vec3<u32>) {
     
     let sigma = 1.0;
 
+
+    let tau = 3.14*2;
+    let vert_cnt = 5.0;
+
+    let verts = array<vec3f,5>(
+        vec3f(sin(1./vert_cnt*tau),cos(1./vert_cnt*tau),0.0),
+        vec3f(sin(2./vert_cnt*tau),cos(2./vert_cnt*tau),0.0),
+        vec3f(sin(3./vert_cnt*tau),cos(3./vert_cnt*tau),0.0),
+        vec3f(sin(4./vert_cnt*tau),cos(4./vert_cnt*tau),0.0),
+        vec3f(sin(5./vert_cnt*tau),cos(5./vert_cnt*tau),0.0)
+    );
+
     // Normalize the vector to ensure it lies on the unit sphere
     
 
@@ -77,9 +89,9 @@ fn splat(@builtin(global_invocation_id) id: vec3<u32>) {
         
 
         // ok find a random vertex
-        var vertex_id = i32(floor(hash_f() * 4.0 ));
+        var vertex_id = i32(floor(hash_f() * 5.0 ));
 
-        var vertex_p = verticies[vertex_id];
+        var vertex_p = verts[vertex_id];
 
         var middlepoint = mix(vertex_p, p, 0.5);
         p = middlepoint;
