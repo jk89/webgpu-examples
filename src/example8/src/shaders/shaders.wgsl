@@ -41,7 +41,7 @@ fn splat(@builtin(global_invocation_id) id: vec3<u32>) {
 
     for (var i = 0; i < 100; i++) {
         // find a random vertex
-        var vertex_id = i32(floor(hash_f() * 5.0 ));
+        var vertex_id = i32(floor(hash_f() * 4.0 ));
 
         // Extract vertex from verts or verticies
         var vertex_p = verts[vertex_id]; // somehow 'verticies' does not work!
