@@ -121,8 +121,6 @@ const main = async () => {
     function paint() {
         const timestamp = performance.now()
         const delta =  timestamp - last_timestamp;
-        
-
         const width = canvas.clientWidth;
         const height = canvas.clientHeight;
         const aspect = width / height;
