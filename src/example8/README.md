@@ -1,4 +1,4 @@
-# Example 6 Fragment shader with uniforms
+# Example 8 - Compute shaders
 
 ```
  npm install
