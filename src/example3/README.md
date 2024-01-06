@@ -1,4 +1,4 @@
-# Example 2 Uniforms
+# Example 3 - Uniforms
 
 ```
  npm install
